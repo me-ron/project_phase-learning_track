@@ -152,7 +152,7 @@ func LISTBORROWED(lib *service.Library, member model.Member) {
 	}
 }
 
-func SIGNUP(lib *service.Library) model.Member{
+func SIGNUP(lib *service.Library) int{
 	name, n_err := getStringInput("Name:", `^(?=.*\w)[\w\s]+$`)
 	for n_err != nil {
 		fmt.Println(n_err.Error())
@@ -165,7 +165,7 @@ func SIGNUP(lib *service.Library) model.Member{
 	}
 
 	lib.AddMember(member)
-	return member
+	return member.ID
 }
 
 func getmem()(int, error){
@@ -178,13 +178,13 @@ func getmem()(int, error){
 	return ID, nil
 }
 
-func LOGIN(lib *service.Library)model.Member{
+func LOGIN(lib *service.Library)int{
 	ID, _ := getmem()
-	member, ok := lib.Members[ID]
+	_, ok := lib.Members[ID]
 	for !ok{
 		ID, _ = getmem()
-		member, ok = lib.Members[ID]	
+		_, ok = lib.Members[ID]	
 	}
 
-	return *member
+	return ID
 }
