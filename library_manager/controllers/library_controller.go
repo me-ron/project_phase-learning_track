@@ -2,19 +2,19 @@ package controllers
 
 import (
 	"bufio"
-	"fmt"
-	"os"
-	"regexp"
-	"strings"
 	"errors"
-	sconv "strconv"
+	"fmt"
 	model "library/models"
 	service "library/services"
+	"os"
+	"regexp"
+	sconv "strconv"
+	"strings"
 )
 
 var reader *bufio.Reader = bufio.NewReader(os.Stdin)
 
-func display(Books []model.Book){
+func display(Books []model.Book) {
 	for _, book := range Books {
 		fmt.Printf("%-20d %-30s %-30s %-30s\n", book.ID, book.Title, book.Author, book.Status)
 	}
@@ -27,7 +27,7 @@ func getStringInput(prompt string, regex string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	input = strings.TrimSpace(input[:len(input)-1])
+	input = strings.TrimSpace(input)
 	matched, _ := regexp.MatchString(regex, input)
 	if matched {
 		return input, nil
@@ -36,33 +36,33 @@ func getStringInput(prompt string, regex string) (string, error) {
 
 }
 
-
 func getIntInput(prompt string) (int, error) {
 	fmt.Println(prompt)
 	sInput, err := reader.ReadString('\n')
 	if err != nil {
 		return 0, err
 	}
-	input, err := sconv.Atoi(sInput[:len(sInput)-1])
+	sInput = strings.TrimSpace(sInput)
+	input, err := sconv.Atoi(sInput)
 	if err == nil {
 		return input, nil
 	}
-		
+
 	return 0, errors.New("invalid integer")
 }
 
 func ADDBOOK(lib *service.Library) {
-	title, t_err := getStringInput("Title:", `^(?=.*\w)[\w\s]+$`)
+	title, t_err := getStringInput("Title:", `^[^\d]`)
 	for t_err != nil {
 		fmt.Println(t_err.Error())
-		title, t_err = getStringInput("Title:", `^(?=.*\w)[\w\s]+$`)
-		
+		title, t_err = getStringInput("Title:", `^[^\d]`)
+
 	}
 
-	author, a_err := getStringInput("Author:", `^(?=.*\w)[\w\s]+$`)
+	author, a_err := getStringInput("Author:", `^[^\d]`)
 	for a_err != nil {
 		fmt.Println(a_err.Error())
-		author, a_err = getStringInput("Author:", `^(?=.*\w)[\w\s]+$`)
+		author, a_err = getStringInput("Author:", `^[^\d]`)
 	}
 
 	book := model.Book{
@@ -87,20 +87,15 @@ func REMOVE(lib *service.Library) {
 	fmt.Println("Book removed successfully.")
 }
 
-func BORROW(lib *service.Library) {
+func BORROW(lib *service.Library, memberID int) {
 	bookID, b_err := getIntInput("Book ID:")
 	for b_err != nil {
 		fmt.Println(b_err.Error())
 		bookID, b_err = getIntInput("Book ID:")
 	}
 
-	memberID, m_err := getIntInput("Member ID:")
-	for m_err != nil {
-		fmt.Println(m_err.Error())
-		memberID, m_err = getIntInput("Member ID:")
-	}
-
 	err := lib.BorrowBook(bookID, memberID)
+	fmt.Println(lib.Books[bookID])
 	if err != nil {
 		fmt.Println("Error:", err.Error())
 	} else {
@@ -108,20 +103,15 @@ func BORROW(lib *service.Library) {
 	}
 }
 
-func RETURN(lib *service.Library) {
+func RETURN(lib *service.Library, memberID int) {
 	bookID, b_err := getIntInput("Book ID:")
 	for b_err != nil {
 		fmt.Println(b_err.Error())
 		bookID, b_err = getIntInput("Book ID:")
 	}
 
-	memberID, m_err := getIntInput("Member ID:")
-	for m_err != nil {
-		fmt.Println(m_err.Error())
-		memberID, m_err = getIntInput("Member ID:")
-	}
-
 	err := lib.ReturnBook(bookID, memberID)
+	fmt.Println(lib.Books[bookID])
 	if err != nil {
 		fmt.Println("Error:", err.Error())
 	} else {
@@ -140,9 +130,9 @@ func LISTAVAILABLE(lib *service.Library) {
 	}
 }
 
-func LISTBORROWED(lib *service.Library, member model.Member) {
-	memberID := member.ID
-	
+func LISTBORROWED(lib *service.Library, id int) {
+	memberID := id
+
 	borrowedBooks := lib.ListBorrowedBooks(memberID)
 	if len(borrowedBooks) == 0 {
 		fmt.Println("No borrowed books.")
@@ -152,11 +142,11 @@ func LISTBORROWED(lib *service.Library, member model.Member) {
 	}
 }
 
-func SIGNUP(lib *service.Library) int{
-	name, n_err := getStringInput("Name:", `^(?=.*\w)[\w\s]+$`)
+func SIGNUP(lib *service.Library) int {
+	name, n_err := getStringInput("Name:", `^[^\d]`)
 	for n_err != nil {
 		fmt.Println(n_err.Error())
-		name, n_err = getStringInput("Name:", `^(?=.*\w)[\w\s]+$`)
+		name, n_err = getStringInput("Name:", `^[^\d]`)
 	}
 
 	member := model.Member{
@@ -168,22 +158,23 @@ func SIGNUP(lib *service.Library) int{
 	return member.ID
 }
 
-func getmem()(int, error){
+func getmem() (int, error) {
 	ID, m_err := getIntInput("ID:")
-	for m_err != nil{
+	for m_err != nil {
 		fmt.Println(m_err.Error())
 		ID, m_err = getIntInput("ID:")
-	
+
 	}
 	return ID, nil
 }
 
-func LOGIN(lib *service.Library)int{
+func LOGIN(lib *service.Library) int {
 	ID, _ := getmem()
 	_, ok := lib.Members[ID]
-	for !ok{
+	for !ok {
+		fmt.Println("NOT LOGGED IN")
 		ID, _ = getmem()
-		_, ok = lib.Members[ID]	
+		_, ok = lib.Members[ID]
 	}
 
 	return ID
