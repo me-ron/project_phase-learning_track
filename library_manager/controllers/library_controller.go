@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
+	"errors"
 	sconv "strconv"
 	model "library/models"
 	service "library/services"
@@ -12,50 +14,55 @@ import (
 
 var reader *bufio.Reader = bufio.NewReader(os.Stdin)
 
-// Helper function to get string input and validate with regex
+func display(Books []model.Book){
+	for _, book := range Books {
+		fmt.Printf("%-20d %-30s %-30s %-30s\n", book.ID, book.Title, book.Author, book.Status)
+	}
+}
+
 func getStringInput(prompt string, regex string) (string, error) {
 	fmt.Println(prompt)
-	for {
-		input, err := reader.ReadString('\n')
-		if err != nil {
-			return "", err
-		}
-		input = input[:len(input)-1]
-		matched, _ := regexp.MatchString(regex, input)
-		if matched {
-			return input, nil
-		}
-		fmt.Println("Invalid input. Please try again.")
+
+	input, err := reader.ReadString('\n')
+	if err != nil {
+		return "", err
 	}
+	input = strings.TrimSpace(input[:len(input)-1])
+	matched, _ := regexp.MatchString(regex, input)
+	if matched {
+		return input, nil
+	}
+	return "", errors.New("invalid input")
+
 }
 
-// Helper function to get integer input
+
 func getIntInput(prompt string) (int, error) {
 	fmt.Println(prompt)
-	for {
-		sInput, err := reader.ReadString('\n')
-		if err != nil {
-			return 0, err
-		}
-		input, err := sconv.Atoi(sInput[:len(sInput)-1]) // Remove the newline character
-		if err == nil {
-			return input, nil
-		}
-		fmt.Println("Invalid input. Please enter a valid number.")
+	sInput, err := reader.ReadString('\n')
+	if err != nil {
+		return 0, err
 	}
+	input, err := sconv.Atoi(sInput[:len(sInput)-1])
+	if err == nil {
+		return input, nil
+	}
+		
+	return 0, errors.New("invalid integer")
 }
 
-func ADD(lib *service.Library) {
-	title, t_err := getStringInput("Title:", `^[\w\s]+$`)
-	if t_err != nil {
+func ADDBOOK(lib *service.Library) {
+	title, t_err := getStringInput("Title:", `^(?=.*\w)[\w\s]+$`)
+	for t_err != nil {
 		fmt.Println(t_err.Error())
-		return
+		title, t_err = getStringInput("Title:", `^(?=.*\w)[\w\s]+$`)
+		
 	}
 
-	author, a_err := getStringInput("Author:", `^[\w\s]+$`)
-	if a_err != nil {
+	author, a_err := getStringInput("Author:", `^(?=.*\w)[\w\s]+$`)
+	for a_err != nil {
 		fmt.Println(a_err.Error())
-		return
+		author, a_err = getStringInput("Author:", `^(?=.*\w)[\w\s]+$`)
 	}
 
 	book := model.Book{
@@ -71,9 +78,9 @@ func ADD(lib *service.Library) {
 
 func REMOVE(lib *service.Library) {
 	id, err := getIntInput("ID:")
-	if err != nil {
+	for err != nil {
 		fmt.Println(err.Error())
-		return
+		id, err = getIntInput("ID:")
 	}
 
 	lib.RemoveBook(id)
@@ -82,15 +89,15 @@ func REMOVE(lib *service.Library) {
 
 func BORROW(lib *service.Library) {
 	bookID, b_err := getIntInput("Book ID:")
-	if b_err != nil {
+	for b_err != nil {
 		fmt.Println(b_err.Error())
-		return
+		bookID, b_err = getIntInput("Book ID:")
 	}
 
 	memberID, m_err := getIntInput("Member ID:")
-	if m_err != nil {
+	for m_err != nil {
 		fmt.Println(m_err.Error())
-		return
+		memberID, m_err = getIntInput("Member ID:")
 	}
 
 	err := lib.BorrowBook(bookID, memberID)
@@ -103,15 +110,15 @@ func BORROW(lib *service.Library) {
 
 func RETURN(lib *service.Library) {
 	bookID, b_err := getIntInput("Book ID:")
-	if b_err != nil {
+	for b_err != nil {
 		fmt.Println(b_err.Error())
-		return
+		bookID, b_err = getIntInput("Book ID:")
 	}
 
 	memberID, m_err := getIntInput("Member ID:")
-	if m_err != nil {
+	for m_err != nil {
 		fmt.Println(m_err.Error())
-		return
+		memberID, m_err = getIntInput("Member ID:")
 	}
 
 	err := lib.ReturnBook(bookID, memberID)
@@ -128,35 +135,28 @@ func LISTAVAILABLE(lib *service.Library) {
 		fmt.Println("No available books.")
 	} else {
 		fmt.Println("Available books:")
-		for _, book := range availableBooks {
-			fmt.Printf("ID: %d, Title: %s, Author: %s\n", book.ID, book.Title, book.Author)
-		}
+		display(availableBooks)
+
 	}
 }
 
-func LISTBORROWED(lib *service.Library) {
-	memberID, m_err := getIntInput("Member ID:")
-	if m_err != nil {
-		fmt.Println(m_err.Error())
-		return
-	}
-
+func LISTBORROWED(lib *service.Library, member model.Member) {
+	memberID := member.ID
+	
 	borrowedBooks := lib.ListBorrowedBooks(memberID)
 	if len(borrowedBooks) == 0 {
 		fmt.Println("No borrowed books.")
 	} else {
 		fmt.Println("Borrowed books:")
-		for _, book := range borrowedBooks {
-			fmt.Printf("ID: %d, Title: %s, Author: %s\n", book.ID, book.Title, book.Author)
-		}
+		display(borrowedBooks)
 	}
 }
 
-func ADDMEMBER(lib *service.Library) {
-	name, n_err := getStringInput("Name:", `^[\w\s]+$`)
-	if n_err != nil {
+func SIGNUP(lib *service.Library) model.Member{
+	name, n_err := getStringInput("Name:", `^(?=.*\w)[\w\s]+$`)
+	for n_err != nil {
 		fmt.Println(n_err.Error())
-		return
+		name, n_err = getStringInput("Name:", `^(?=.*\w)[\w\s]+$`)
 	}
 
 	member := model.Member{
@@ -165,5 +165,26 @@ func ADDMEMBER(lib *service.Library) {
 	}
 
 	lib.AddMember(member)
-	fmt.Println("Member added successfully.")
+	return member
+}
+
+func getmem()(int, error){
+	ID, m_err := getIntInput("ID:")
+	for m_err != nil{
+		fmt.Println(m_err.Error())
+		ID, m_err = getIntInput("ID:")
+	
+	}
+	return ID, nil
+}
+
+func LOGIN(lib *service.Library)model.Member{
+	ID, _ := getmem()
+	member, ok := lib.Members[ID]
+	for !ok{
+		ID, _ = getmem()
+		member, ok = lib.Members[ID]	
+	}
+
+	return *member
 }

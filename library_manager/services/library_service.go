@@ -29,6 +29,7 @@ func (lib *Library) AddBook(book model.Book){
 
 func (lib *Library) AddMember(member model.Member){
 	lib.Members[member.ID] = &member
+	lib.NextmemberID ++
 }
 
 func(lib *Library) RemoveBook(bookID int){
