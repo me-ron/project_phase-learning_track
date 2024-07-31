@@ -1,26 +1,24 @@
 package main
 
 import (
-	"bufio"
-	sys "fmt"
-	"os"
+	"fmt"
 	grade "task1/grd"
 )
 
 func test(){
-	var name string; var num float64
-	reader := bufio.NewReader(os.Stdin)
-
-	line, _ := reader.ReadString('\n')
-
-	sys.Println(line)
-	sys.Println("Enter your name:")
-	sys.Scan(&name)
-	sys.Println("Enter the number of courses you take:")
-	sys.Scan(&num)
+	name, n_err := grade.Getstring("Enter your name:", `^[^\d]`)
+	for n_err != nil{
+		fmt.Println(n_err.Error())
+		name, n_err = grade.Getstring("Enter your name:", `^[^\d]`)
+	}
+	num, i_err := grade.Getint("Enter the number of courses you take:")
+	for i_err != nil{
+		fmt.Println(i_err.Error())
+		num, i_err = grade.Getint("Enter the number of courses you take:")
+	}
 
 	var chr grade.Chars
-	chr.Input(name, num)
+	chr.Input(name, float64(num))
 	chr.Display()
 
 }
