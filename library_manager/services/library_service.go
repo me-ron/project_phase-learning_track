@@ -6,12 +6,15 @@ import(
 )
 
 type Library struct{
-	Books map[int]model.Book
+	Books map[int]*model.Book
 	Members map[int]*model.Member
+	NextbookID int
+	NextmemberID int
 }
 
 type LibraryManager interface{
 	AddBook(book model.Book)
+	AddMember(member model.Member)
 	RemoveBook(bookID int)
 	BorrowBook(bookID int, memberID int) error
 	ReturnBook(bookID int, memberID int) error
@@ -20,7 +23,12 @@ type LibraryManager interface{
 }
 
 func (lib *Library) AddBook(book model.Book){
-	lib.Books[book.ID] = book
+	lib.Books[book.ID] = &book
+	lib.NextbookID ++
+}
+
+func (lib *Library) AddMember(member model.Member){
+	lib.Members[member.ID] = &member
 }
 
 func(lib *Library) RemoveBook(bookID int){
@@ -34,10 +42,12 @@ func(lib *Library) BorrowBook(bookID int, memberID int) error{
 			return errors.New("the book isn't available")
 		} 
 		book.Status = "Borrowed"
-		lib.Members[memberID].BorrowedBooks = append(lib.Members[memberID].BorrowedBooks, book)
-	return nil}else{
-		return errors.New("book doesn't exist")
-	}
+		lib.Members[memberID].BorrowedBooks = append(lib.Members[memberID].BorrowedBooks, *book)
+
+		return nil
+		}
+	return errors.New("book doesn't exist")
+	
 }
 
 func(lib *Library) ReturnBook(bookID int, memberID int) error{
@@ -45,16 +55,13 @@ func(lib *Library) ReturnBook(bookID int, memberID int) error{
 	if ok{
 		book.Status = "Available"
 		member_books := lib.Members[memberID].BorrowedBooks
-		var nlist []model.Book
 		for i := range len(member_books){
-			book = member_books[i]
+			*book = member_books[i]
 			if book.ID == bookID{
-				continue
+				member_books = append(member_books[:i], member_books[i + 1:]...)
 			}
-			nlist = append(nlist, book)
 		}
 
-		lib.Members[memberID].BorrowedBooks = nlist
 		return nil
 	}else{
 		return errors.New("book doesn't exist")
@@ -66,13 +73,13 @@ func (lib *Library) ListAvailableBooks() []model.Book{
 	var avail_books []model.Book
 	for _, book := range lib.Books{
 		if book.Status == "Available"{
-			avail_books = append(avail_books, book)
+			avail_books = append(avail_books, *book)
 		}
 	}
 
 	return avail_books
 }
 
-func (lib * Library) ListBorrowedBooks(memberID int) []model.Book{
+func (lib *Library) ListBorrowedBooks(memberID int) []model.Book{
 	return lib.Members[memberID].BorrowedBooks
 }
