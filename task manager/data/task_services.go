@@ -13,16 +13,17 @@ func (t *Task_manager) Get_task(id string)(task models.Task, ok bool){
 	for i := range len(t.Tasks){
 		if t.Tasks[i].ID == id {
 			task = *t.Tasks[i]
+			ok = true
 			return
 		}
 	}
 
 	task = models.Task{}
-	ok = true
+	ok = false
 	return
 }
 
-func (t *Task_manager) Delete_task(id string)bool{
+func (t *Task_manager) Delete_task(id string) bool{
 	for i := range len(t.Tasks){
 		if (t.Tasks)[i].ID == id{
 			t.Tasks = append((t.Tasks)[:i], (t.Tasks)[i + 1:]...)
