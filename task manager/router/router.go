@@ -8,16 +8,17 @@ import (
 )
 
 var tasks []*models.Task
+var nextId int
 
 func Run(){
 	router := gin.Default()
 
-	router.GET("api/tasks", controllers.GetAllTasks(tasks))
-	router.GET("api/tasks/:id", controllers.GetTaskById(tasks))
-	router.POST("api/tasks", controllers.PostTask(tasks))
-	router.PUT("api/tasks/:id", controllers.UpdateTask(tasks))
-	router.DELETE("api/tasks/:id", controllers.DeleteTask(tasks))
+	router.GET("api/tasks", controllers.GetAllTasks(&tasks))
+	router.GET("api/tasks/:id", controllers.GetTaskById(&tasks))
+	router.POST("api/tasks", controllers.PostTask(&tasks, &nextId))
+	router.PUT("api/tasks/:id", controllers.UpdateTask(&tasks))
+	router.DELETE("api/tasks/:id", controllers.DeleteTask(&tasks))
 
-	router.Run("localhost:8080/")
+	router.Run("localhost:8080")
 
 }
