@@ -42,7 +42,7 @@ func DeleteTask(c *gin.Context, tasks []*models.Task){
 	for i := range len(tasks){
 		if tasks[i].ID == id{
 			tasks = append(tasks[:i], tasks[i + 1:]...)
-			c.IndentedJSON(http.StatusAccepted, gin.H{"messages" : "deleted successfully"})
+			c.IndentedJSON(http.StatusOK, gin.H{"messages" : "deleted successfully"})
 			return
 		}
 	}
@@ -59,7 +59,7 @@ func UpdateTask(c *gin.Context, tasks []*models.Task){
 	for i := range len(tasks){
 		if tasks[i].ID == task.ID{
 			tasks[i] = &task
-			c.IndentedJSON(http.StatusAccepted, task)
+			c.IndentedJSON(http.StatusOK, task)
 		}
 	}
 }
