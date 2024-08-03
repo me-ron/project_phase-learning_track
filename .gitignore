@@ -43,5 +43,5 @@ vendor/
 Thumbs.db
 
 # Ignore Go modules
-/go.sum
-/go.mod
+go.sum
+go.mod
