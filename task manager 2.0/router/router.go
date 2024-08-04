@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Run(task_manager data.Task_manager){
+func Run(task_manager data.Taskmanager){
 	router := gin.Default()
 
 	router.GET("api/tasks", controllers.GetAllTasks(&task_manager))

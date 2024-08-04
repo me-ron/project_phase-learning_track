@@ -1,18 +1,31 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"task_manager/data"
-	"task_manager/models"
+	connect "task_manager/db_connection"
 	"task_manager/router"
 )
 
-var task_manager data.Task_manager = data.Task_manager{
-	Tasks : make([]*models.Task, 0),
-	NextId: 0,
-}
+var tm data.Taskmanager
 
 func main(){
 	fmt.Println("Server started")
-	router.Run(task_manager)
+	client, err := connect.DB()
+	if err != nil{
+		log.Fatal(err.Error())
+		return
+	}
+	defer func(){
+		err := client.Disconnect(context.TODO())
+		if err != nil{
+			log.Fatal(err.Error())
+		}
+		}()
+
+	tm.Client = client
+	router.Run(tm)
+
 }

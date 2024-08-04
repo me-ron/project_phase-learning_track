@@ -1,29 +1,32 @@
 package controllers
 
 import (
-	"log"
 	"net/http"
-	"strconv"
 	"task_manager/data"
 	"task_manager/models"
 
 	"github.com/gin-gonic/gin"
 )
 
-func GetAllTasks(tm *data.Task_manager) gin.HandlerFunc{
+func GetAllTasks(tm *data.Taskmanager) gin.HandlerFunc{
 		return func (c *gin.Context){
-			c.IndentedJSON(http.StatusOK, tm.Tasks)
+			tasks, err := tm.Get_tasks()
+			if err != nil{
+				c.IndentedJSON(http.StatusBadGateway, gin.H{"message" : err.Error()})
+				return
+			}
+			c.IndentedJSON(http.StatusOK, tasks)
 
 		}
 }
 
-func GetTaskById(tm *data.Task_manager) gin.HandlerFunc{
+func GetTaskById(tm *data.Taskmanager) gin.HandlerFunc{
 
 	return func (c *gin.Context){
 		id := c.Param("id")
 		
-		task, ok := tm.Get_task(id)
-		if ok{
+		task, err := tm.Get_task(id)
+		if err != nil{
 			c.IndentedJSON(http.StatusOK, task)
 			return
 		}
@@ -32,7 +35,7 @@ func GetTaskById(tm *data.Task_manager) gin.HandlerFunc{
 	}
 }
 
-func PostTask(tm *data.Task_manager) gin.HandlerFunc{
+func PostTask(tm *data.Taskmanager) gin.HandlerFunc{
 	return func (c *gin.Context){
 			var task models.Task
 
@@ -40,22 +43,22 @@ func PostTask(tm *data.Task_manager) gin.HandlerFunc{
 				c.IndentedJSON(http.StatusBadRequest, gin.H{"message" : "invalid request"})
 				return
 			}
-
-			task.ID = strconv.Itoa(tm.NextId)
-			tm.NextId++
-			tm.Tasks = append(tm.Tasks, &task)
-			log.Println(tm.Tasks)
-			c.IndentedJSON(http.StatusCreated, *tm.Tasks[len(tm.Tasks) - 1])
+			err := tm.Post_Task(task)
+			if err != nil{
+				c.IndentedJSON(http.StatusBadGateway, gin.H{"message" : err.Error()})
+				return
+			}
+			c.IndentedJSON(http.StatusCreated, gin.H{"message" : "created sucessfully"})
 		}
 
 }
 
 
-func DeleteTask(tm *data.Task_manager) gin.HandlerFunc{
+func DeleteTask(tm *data.Taskmanager) gin.HandlerFunc{
 	return func (c *gin.Context){
 		id := c.Param("id")
-		ok := tm.Delete_task(id)
-		if ok{
+		err := tm.Delete_task(id)
+		if err == nil{
 			c.IndentedJSON(http.StatusOK, gin.H{"messages" : "deleted successfully"})
 			return
 		}
@@ -64,7 +67,7 @@ func DeleteTask(tm *data.Task_manager) gin.HandlerFunc{
 
 }
 
-func UpdateTask(tm *data.Task_manager) gin.HandlerFunc{
+func UpdateTask(tm *data.Taskmanager) gin.HandlerFunc{
 	return func (c *gin.Context){
 		var task models.Task
 
@@ -73,8 +76,8 @@ func UpdateTask(tm *data.Task_manager) gin.HandlerFunc{
 		} 
 		
 		id := c.Param("id")
-		task, ok := tm.Update_task(id, task)
-		if ok{
+		task, err := tm.Update_task(id, task)
+		if err == nil{
 			c.IndentedJSON(http.StatusOK, task)
 			return
 		}
