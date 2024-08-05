@@ -114,7 +114,8 @@ func (tm *Taskmanager) UpdateTask(ctx context.Context, id string, task models.Ta
 		return models.Task{}, err
 	}
 
-	filter := bson.D{{Key: "_id", Value: id}}
+	obId, _ := primitive.ObjectIDFromHex(id)
+	filter := bson.D{{Key: "_id", Value: obId}}
 	update := bson.D{{Key: "$set", Value: doc}}
 
 	_, err = coll.UpdateOne(context.TODO(), filter, update)
