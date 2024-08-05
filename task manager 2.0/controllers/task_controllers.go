@@ -27,11 +27,11 @@ func GetTaskById(tm *data.Taskmanager) gin.HandlerFunc{
 		id := c.Param("id")
 		
 		task, err := tm.GetTask(context.TODO(),id)
-		if err != nil{
+		if err == nil{
 			c.IndentedJSON(http.StatusOK, task)
 			return
 		}
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message" : "Task not found"})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message" : err.Error()})
 
 	}
 }
