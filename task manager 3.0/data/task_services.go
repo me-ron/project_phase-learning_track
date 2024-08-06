@@ -13,12 +13,12 @@ type Taskmanager struct {
 	Client *mongo.Client
 }
 
-func (tm *Taskmanager) collection() *mongo.Collection{
-	return tm.Client.Database("task_manager").Collection("tasks")
+func (tm *Taskmanager) collection(name string) *mongo.Collection{
+	return tm.Client.Database("task_manager").Collection(name)
 }
 
 func (tm *Taskmanager) PostTask(ctx context.Context, task models.Task) error {
-	coll := tm.collection()
+	coll := tm.collection("tasks")
 
 	var doc bson.M
 	bsonModel,err := bson.Marshal(task)
@@ -41,7 +41,7 @@ func (tm *Taskmanager) PostTask(ctx context.Context, task models.Task) error {
 }
 
 func (tm *Taskmanager) GetTasks(ctx context.Context) ([]models.Task, error) {
-	coll := tm.collection()
+	coll := tm.collection("tasks")
 	cursor, err := coll.Find(context.TODO(), bson.M{})
 
 	if err != nil{
@@ -66,7 +66,7 @@ func (tm *Taskmanager) GetTasks(ctx context.Context) ([]models.Task, error) {
 }
 
 func (tm *Taskmanager) GetTask(ctx context.Context, id string) (models.Task, error) {
-	coll := tm.collection()
+	coll := tm.collection("tasks")
 	obId, _ := primitive.ObjectIDFromHex(id)
 	query := bson.M{"_id": obId}
 
@@ -85,7 +85,7 @@ func (tm *Taskmanager) DeleteTask(ctx context.Context, id string) error {
 	obId, _ := primitive.ObjectIDFromHex(id)
 	query := bson.M{"_id": obId}
 
-	coll := tm.collection()
+	coll := tm.collection("tasks")
 	res, err := coll.DeleteOne(context.TODO(), query)
 
 	if err != nil{
@@ -101,7 +101,7 @@ func (tm *Taskmanager) DeleteTask(ctx context.Context, id string) error {
 }
 
 func (tm *Taskmanager) UpdateTask(ctx context.Context, id string, task models.Task) (models.Task, error) {
-	coll := tm.collection()
+	coll := tm.collection("tasks")
 	
 	bsonModel, err := bson.Marshal(task)
 	if err != nil {

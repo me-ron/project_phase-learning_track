@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"net/http"
 	"task_manager/data"
 	"task_manager/models"
@@ -11,7 +10,7 @@ import (
 
 func GetAllTasks(tm *data.Taskmanager) gin.HandlerFunc{
 		return func (c *gin.Context){
-			tasks, err := tm.GetTasks(context.TODO())
+			tasks, err := tm.GetTasks()
 			if err != nil{
 				c.IndentedJSON(http.StatusBadGateway, gin.H{"message" : err.Error()})
 				return
@@ -26,7 +25,7 @@ func GetTaskById(tm *data.Taskmanager) gin.HandlerFunc{
 	return func (c *gin.Context){
 		id := c.Param("id")
 		
-		task, err := tm.GetTask(context.TODO(),id)
+		task, err := tm.GetTask(id)
 		if err == nil{
 			c.IndentedJSON(http.StatusOK, task)
 			return
@@ -44,7 +43,7 @@ func PostTask(tm *data.Taskmanager) gin.HandlerFunc{
 				c.IndentedJSON(http.StatusBadRequest, gin.H{"message" : "invalid request"})
 				return
 			}
-			err := tm.PostTask(context.TODO(),task)
+			err := tm.PostTask(task)
 			if err != nil{
 				c.IndentedJSON(http.StatusBadGateway, gin.H{"message" : err.Error()})
 				return
@@ -58,7 +57,7 @@ func PostTask(tm *data.Taskmanager) gin.HandlerFunc{
 func DeleteTask(tm *data.Taskmanager) gin.HandlerFunc{
 	return func (c *gin.Context){
 		id := c.Param("id")
-		err := tm.DeleteTask(context.TODO(),id)
+		err := tm.DeleteTask(id)
 		if err == nil{
 			c.IndentedJSON(http.StatusOK, gin.H{"messages" : "deleted successfully"})
 			return
@@ -77,7 +76,7 @@ func UpdateTask(tm *data.Taskmanager) gin.HandlerFunc{
 		} 
 		
 		id := c.Param("id")
-		task, err := tm.UpdateTask(context.TODO(), id, task)
+		task, err := tm.UpdateTask(id, task)
 		if err == nil{
 			c.IndentedJSON(http.StatusOK, task)
 			return
