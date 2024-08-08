@@ -7,9 +7,8 @@ import (
 	"task_manager/data"
 	connect "task_manager/db_connection"
 	"task_manager/router"
-)
 
-var tm data.Taskmanager
+)
 
 func main(){
 	fmt.Println("Server started")
@@ -25,7 +24,11 @@ func main(){
 		}
 		}()
 
-	tm.Client = client
+	tm, er := data.NewTaskmanager(client)
+	if er != nil{
+		log.Fatal(er.Error())
+		return
+	}
 	router.Run(tm)
 
 }

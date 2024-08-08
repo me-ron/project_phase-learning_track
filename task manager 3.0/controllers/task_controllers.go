@@ -6,11 +6,24 @@ import (
 	"task_manager/models"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func GetAllTasks(tm *data.Taskmanager) gin.HandlerFunc{
 		return func (c *gin.Context){
-			tasks, err := tm.GetTasks()
+			f, exists := c.Get("filter")
+			if !exists{
+				c.IndentedJSON(http.StatusBadGateway, gin.H{"message" : "filter couldn't be found"})
+				return
+			}
+
+			filter, ok := f.(bson.M)
+			if !ok{
+				c.IndentedJSON(http.StatusBadGateway, gin.H{"message" : "type assertion didn't work"})
+				return
+			}
+			
+			tasks, err := tm.GetTasks(filter)
 			if err != nil{
 				c.IndentedJSON(http.StatusBadGateway, gin.H{"message" : err.Error()})
 				return
@@ -21,11 +34,21 @@ func GetAllTasks(tm *data.Taskmanager) gin.HandlerFunc{
 }
 
 func GetTaskById(tm *data.Taskmanager) gin.HandlerFunc{
-
 	return func (c *gin.Context){
 		id := c.Param("id")
+		user, exists := c.Get("user")
+		if !exists{
+			c.IndentedJSON(http.StatusBadGateway, gin.H{"message" : "user couldn't be found"})
+			return
+		}
+
+		usr, ok := user.(models.DBUser)
+		if !ok{
+			c.IndentedJSON(http.StatusBadGateway, gin.H{"message" : "type assertion didn't work"})
+			return
+		}
 		
-		task, err := tm.GetTask(id)
+		task, err := tm.GetTask(id, usr.ID)
 		if err == nil{
 			c.IndentedJSON(http.StatusOK, task)
 			return
@@ -43,6 +66,18 @@ func PostTask(tm *data.Taskmanager) gin.HandlerFunc{
 				c.IndentedJSON(http.StatusBadRequest, gin.H{"message" : "invalid request"})
 				return
 			}
+			user, exists := c.Get("user")
+			if !exists{
+				c.IndentedJSON(http.StatusBadGateway, gin.H{"message" : "user couldn't be found"})
+				return
+			}
+
+			usr, ok := user.(models.DBUser)
+			if !ok{
+				c.IndentedJSON(http.StatusBadGateway, gin.H{"message" : "type assertion didn't work"})
+				return
+			}
+			task.User = usr
 			err := tm.PostTask(task)
 			if err != nil{
 				c.IndentedJSON(http.StatusBadGateway, gin.H{"message" : err.Error()})
@@ -57,7 +92,18 @@ func PostTask(tm *data.Taskmanager) gin.HandlerFunc{
 func DeleteTask(tm *data.Taskmanager) gin.HandlerFunc{
 	return func (c *gin.Context){
 		id := c.Param("id")
-		err := tm.DeleteTask(id)
+		user, exists := c.Get("user")
+		if !exists{
+			c.IndentedJSON(http.StatusBadGateway, gin.H{"message" : "user couldn't be found"})
+			return
+		}
+
+		usr, ok := user.(models.DBUser)
+		if !ok{
+			c.IndentedJSON(http.StatusBadGateway, gin.H{"message" : "type assertion didn't work"})
+			return
+		}
+		err := tm.DeleteTask(id, usr.ID)
 		if err == nil{
 			c.IndentedJSON(http.StatusOK, gin.H{"messages" : "deleted successfully"})
 			return
@@ -76,7 +122,19 @@ func UpdateTask(tm *data.Taskmanager) gin.HandlerFunc{
 		} 
 		
 		id := c.Param("id")
-		task, err := tm.UpdateTask(id, task)
+		user, exists := c.Get("user")
+		if !exists{
+			c.IndentedJSON(http.StatusBadGateway, gin.H{"message" : "user couldn't be found"})
+			return
+		}
+
+		usr, ok := user.(models.DBUser)
+		if !ok{
+			c.IndentedJSON(http.StatusBadGateway, gin.H{"message" : "type assertion didn't work"})
+			return
+		}
+
+		task, err := tm.UpdateTask(id, task, usr)
 		if err == nil{
 			c.IndentedJSON(http.StatusOK, task)
 			return

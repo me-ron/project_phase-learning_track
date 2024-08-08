@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 type Taskmanager struct {
 	Client *mongo.Client
@@ -15,6 +16,31 @@ type Taskmanager struct {
 
 func (tm *Taskmanager) collection(name string) *mongo.Collection{
 	return tm.Client.Database("task_manager").Collection(name)
+}
+
+func (tm *Taskmanager) EnsureIndexes() error {
+	coll := tm.collection("users")
+	
+	indexModel := mongo.IndexModel{
+		Keys:    bson.M{"email": 1}, 
+		Options: options.Index().SetUnique(true),
+	}
+	
+	_, err := coll.Indexes().CreateOne(context.TODO(), indexModel)
+	return err
+}
+
+func NewTaskmanager(client *mongo.Client) (*Taskmanager, error) {
+	tm := &Taskmanager{
+		Client: client,
+	}
+
+	// Ensure indexes are created
+	if err := tm.EnsureIndexes(); err != nil {
+		return nil, err
+	}
+
+	return tm, nil
 }
 
 func (tm *Taskmanager) PostTask(task models.Task) error {
@@ -40,9 +66,9 @@ func (tm *Taskmanager) PostTask(task models.Task) error {
 	return nil
 }
 
-func (tm *Taskmanager) GetTasks() ([]models.Task, error) {
+func (tm *Taskmanager) GetTasks(filter bson.M) ([]models.Task, error) {
 	coll := tm.collection("tasks")
-	cursor, err := coll.Find(context.TODO(), bson.M{})
+	cursor, err := coll.Find(context.TODO(), filter)
 
 	if err != nil{
 		return nil, err
@@ -65,11 +91,10 @@ func (tm *Taskmanager) GetTasks() ([]models.Task, error) {
 	
 }
 
-func (tm *Taskmanager) GetTask(id string) (models.Task, error) {
+func (tm *Taskmanager) GetTask(id string, userId primitive.ObjectID) (models.Task, error) {
 	coll := tm.collection("tasks")
 	obId, _ := primitive.ObjectIDFromHex(id)
-	query := bson.M{"_id": obId}
-
+	query := bson.M{"_id": obId, "user._id" : userId}
 	var task models.Task
 	err := coll.FindOne(context.TODO(), query).Decode(&task)
 	if err != nil{
@@ -81,9 +106,9 @@ func (tm *Taskmanager) GetTask(id string) (models.Task, error) {
 	
 }
 
-func (tm *Taskmanager) DeleteTask(id string) error {
+func (tm *Taskmanager) DeleteTask(id string, userId primitive.ObjectID) error {
 	obId, _ := primitive.ObjectIDFromHex(id)
-	query := bson.M{"_id": obId}
+	query := bson.M{"_id": obId, "user._id" : userId}
 
 	coll := tm.collection("tasks")
 	res, err := coll.DeleteOne(context.TODO(), query)
@@ -100,9 +125,11 @@ func (tm *Taskmanager) DeleteTask(id string) error {
 	
 }
 
-func (tm *Taskmanager) UpdateTask(id string, task models.Task) (models.Task, error) {
+func (tm *Taskmanager) UpdateTask(id string, task models.Task, user models.DBUser) (models.Task, error) {
 	coll := tm.collection("tasks")
-	
+	obId, _ := primitive.ObjectIDFromHex(id)
+	task.ID = obId
+	task.User = user
 	bsonModel, err := bson.Marshal(task)
 	if err != nil {
 		return models.Task{}, err
@@ -113,9 +140,7 @@ func (tm *Taskmanager) UpdateTask(id string, task models.Task) (models.Task, err
 	if err != nil {
 		return models.Task{}, err
 	}
-
-	obId, _ := primitive.ObjectIDFromHex(id)
-	filter := bson.D{{Key: "_id", Value: obId}}
+	filter := bson.D{{Key: "_id", Value: obId}, {Key: "user._id", Value: user.ID}}
 	update := bson.D{{Key: "$set", Value: doc}}
 
 	_, err = coll.UpdateOne(context.TODO(), filter, update)

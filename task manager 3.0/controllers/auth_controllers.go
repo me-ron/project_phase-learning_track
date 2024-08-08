@@ -10,7 +10,7 @@ import (
 
 func Register(tm *data.Taskmanager)gin.HandlerFunc{
 	return func (c *gin.Context){
-		var user models.User
+		var user models.UserInput
 
 		err := c.ShouldBindJSON(&user)
 		if err != nil{
@@ -18,19 +18,19 @@ func Register(tm *data.Taskmanager)gin.HandlerFunc{
 			return 
 		}
 
-		er := tm.Signup(user)
+		usr, er := tm.Signup(user)
 		if er != nil{
 			c.IndentedJSON(http.StatusBadGateway, gin.H{"message":er.Error()})
 			return
 		}
 
-		c.IndentedJSON(http.StatusCreated, user)
+		c.IndentedJSON(http.StatusCreated, gin.H{"msg":"User created Successfully.", "user" : models.ChangeToOutput(usr)})
 	}
 }
 
-func Enter(tm *data.Taskmanager)gin.HandlerFunc{
+func Login(tm *data.Taskmanager)gin.HandlerFunc{
 	return func (c *gin.Context){
-		var user models.User
+		var user models.UserInput
 		if err := c.ShouldBindJSON(&user); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 			return
@@ -38,10 +38,11 @@ func Enter(tm *data.Taskmanager)gin.HandlerFunc{
 
 		token, err := tm.Login(user)
 		if err != nil {
-			c.JSON(http.StatusBadGateway, gin.H{"error": "Internal server error"})
+			c.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
+			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "User logged in successfully", "token": token})
+		c.JSON(http.StatusOK, gin.H{"token": token, "user" : models.ChangeToOutput(user)})
 		}
 	
 }
