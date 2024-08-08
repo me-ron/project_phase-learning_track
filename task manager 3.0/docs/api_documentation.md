@@ -1,42 +1,137 @@
-# Project: task_manager
+# Project: task_manager2.0
 
-## End-point: http://localhost:8080/api/tasks
-This endpoint allows the client to create a new task by sending a POST request to the specified URL.
+## End-point: Register
+# Register User
 
-### Request Body
+This endpoint is used to register a new user.
 
-- The request should include a JSON object in the body with the following parameters:
+## Request Body
+
+- `name` (string, required): The name of the user.
     
-    - `title` (string): The title of the task.
-        
-    - `description` (string): The description of the task.
-        
+- `email` (string, required): The email address of the user.
+    
+- `password` (string, required): The password for the user.
+    
+- `isadmin` (boolean, required): Indicates whether the user is an admin or not.
+    
 
-### Response
+## Response
 
-The response to the request is a JSON array with the following schema:
+The response for this request is a JSON object with the following schema:
 
 ``` json
-[
-    {
-        "id": "",
-        "title": "",
-        "description": "",
-        "due_date": ""
+{
+  "userId": "string",
+  "name": "string",
+  "email": "string",
+  "isAdmin": "boolean"
+}
+
+ ```
+### Method: POST
+>```
+>http://localhost:8080/api/register
+>```
+### Body (**raw**)
+
+```json
+{
+    "name":"mer",
+    "email": "mr@gmail.com",
+    "password":"mer123",
+    "isadmin": true
+}
+```
+
+
+⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
+
+## End-point: Login
+### API POST /api/login
+
+This endpoint is used to authenticate a user and obtain a token for accessing protected resources.
+
+#### Request Body
+
+- `email` (string, required): The email address of the user.
+    
+- `password` (string, required): The password of the user.
+    
+
+#### Response
+
+- Status: 200
+    
+- Content-Type: application/json
+    
+
+``` json
+{
+    "token": "********",
+    "user": {
+        "id": "********",
+        "email": "********",
+        "isadmin": true
     }
-]
+}
 
  ```
 
-The response contains an array of task objects, where each task object includes the following properties:
+The response contains a token for authentication and user information including user ID, email, and admin status.
+### Method: POST
+>```
+>http://localhost:8080/api/login
+>```
+### Body (**raw**)
 
-- `id` (string): The unique identifier of the task.
+```json
+{
+
+    "email": "mr@gmail.com",
+    "password":"mer123"
+
+}
+```
+
+### 🔑 Authentication bearer
+
+|Param|value|Type|
+|---|---|---|
+
+
+
+⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
+
+## End-point: Create Task
+### API Request Description
+
+This POST request is used to create a new task by providing the title and description in the request body.
+
+### Request Body
+
+- `title` (string, required): The title of the task.
     
-- `title` (string): The title of the task.
+- `description` (string, required): The description of the task.
     
-- `description` (string): The description of the task.
-    
-- `due_date` (string): The due date of the task.
+
+### Response
+
+The response will have a status code of 201 and a JSON content type. The response body will include a message indicating the success or any additional information related to the task creation.
+
+### JSON Schema for Response
+
+``` json
+{
+  "type": "object",
+  "properties": {
+    "message": {
+      "type": "string"
+    }
+  }
+}
+
+ ```
 ### Method: POST
 >```
 >http://localhost:8080/api/tasks
@@ -45,51 +140,23 @@ The response contains an array of task objects, where each task object includes 
 
 ```json
 {
-    "title" : "the title of your task",
-    "description" : "the description of your task"
+    "title" : "blah",
+    "description" : "mmm"
 }
 ```
+
+### 🔑 Authentication bearer
+
+|Param|value|Type|
+|---|---|---|
+|token|{{jwt_token}}|string|
+
 
 
 ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
 
-## End-point: http://localhost:8080/api/tasks
-This endpoint makes an HTTP GET request to retrieve a list of tasks from the server. The request does not require any parameters. The response is in JSON format and returns an array of task objects, each containing the following properties:
-
-- "id" (string): The unique identifier of the task.
-    
-- "title" (string): The title of the task.
-    
-- "description" (string): The description of the task.
-    
-- "due_date" (string): The due date of the task.
-    
-
-Here is the JSON schema for the response:
-
-``` json
-{
-  "type": "array",
-  "items": {
-    "type": "object",
-    "properties": {
-      "id": {
-        "type": "string"
-      },
-      "title": {
-        "type": "string"
-      },
-      "description": {
-        "type": "string"
-      },
-      "due_date": {
-        "type": "string"
-      }
-    }
-  }
-}
-
- ```
+## End-point: Get tasks under user
+This endpoint makes an HTTP GET request to retrieve a list of tasks. The request does not require any specific parameters. The response will be in JSON format and will include an array of task objects, each containing an ID, title, description, due date, and user information including ID, name, email, and admin status.
 ### Method: GET
 >```
 >http://localhost:8080/api/tasks
@@ -98,36 +165,50 @@ Here is the JSON schema for the response:
 
 ```json
 {
-    "title" : "the title of your task",
+    "title" : "updated",
     "description" : "the description of your task"
 }
 ```
 
+### 🔑 Authentication bearer
+
+|Param|value|Type|
+|---|---|---|
+|token|{{jwt_token}}|string|
+
+
 
 ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
 
-## End-point: http://localhost:8080/api/tasks
-This endpoint retrieves a specific task with the ID "0" from the server.
+## End-point: Get task by id under user
+### GET /api/tasks/{taskId}
 
-### Request
+This endpoint retrieves a specific task identified by its unique ID.
 
-The request does not require any parameters in the URL.
+#### Request
 
-### Response
+No request body is required for this endpoint.
 
-The response will have a status code of 200 and a content type of "application/json". The response body will be a JSON object with the following schema:
+- Path Parameters
+    
+    - `taskId` (string, required): The unique ID of the task.
+        
+
+#### Response
+
+The response will be a JSON object with the following schema:
 
 ``` json
 {
-    "id": "",
-    "title": "",
-    "description": "",
-    "due_date": ""
+  "task_id": "string",
+  "title": "string",
+  "description": "string",
+  "status": "string",
+  "created_at": "string",
+  "updated_at": "string"
 }
 
  ```
-
-The "id" represents the unique identifier of the task, "title" represents the title of the task, "description" represents the description of the task, and "due_date" represents the due date of the task.
 ### Method: GET
 >```
 >http://localhost:8080/api/tasks/0
@@ -144,48 +225,21 @@ The "id" represents the unique identifier of the task, "title" represents the ti
 
 ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
 
-## End-point: http://localhost:8080/api/tasks
-### Update Task
+## End-point: Update task under user
+## Update Task
 
-This endpoint is used to update a specific task by its ID.
+This endpoint is used to update a specific task identified by its ID.
 
-#### Request
+### Request Body
 
-- Method: PUT
+- `title` (string, required): The updated title of the task.
     
-- URL: `http://localhost:8080/api/tasks/0`
+- `description` (string, required): The updated description of the task.
     
-- Body:
-    
-    - title (text, optional): The title of the task.
-        
-    - description (text, optional): The description of the task.
-        
 
-#### Response
+### Response
 
-The response is in JSON format and follows the schema below:
-
-``` json
-{
-  "type": "object",
-  "properties": {
-    "id": {
-      "type": "string"
-    },
-    "title": {
-      "type": "string"
-    },
-    "description": {
-      "type": "string"
-    },
-    "due_date": {
-      "type": "string"
-    }
-  }
-}
-
- ```
+The response will include the updated details of the task after the successful update operation.
 ### Method: PUT
 >```
 >http://localhost:8080/api/tasks/0
@@ -202,38 +256,34 @@ The response is in JSON format and follows the schema below:
 
 ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
 
-## End-point: http://localhost:8080/api/tasks
-This endpoint sends an HTTP DELETE request to delete a task with the specified ID. The request should be sent to [http://localhost:8080/api/tasks/0](http://localhost:8080/api/tasks/0).
+## End-point: Delete task under user
+### DELETE /api/tasks/{taskId}
 
-### Response
+This endpoint is used to delete a specific task identified by its unique ID.
 
-The response to this request is in the JSON format with a status code of 200. The response schema is as follows:
+#### Request Body
 
-``` json
-{
-    "type": "object",
-    "properties": {
-        "messages": {
-            "type": "string"
-        }
-    }
-}
+- title (text, optional): The title of the task.
+    
+- description (text, optional): The description of the task.
+    
 
- ```
+#### Response
+
+- Status: 401
+    
+- Content-Type: application/json
+    
+- msg (string): A message indicating the reason for the unauthorized status.
 ### Method: DELETE
 >```
->http://localhost:8080/api/tasks/0
+>http://localhost:8080/api/tasks/66b48726c3abf841cde4098c
 >```
 ### Body (**raw**)
 
 ```json
 {
-    "title" : "the title of your task.",
-    "description" : "the description of your task."
+    "title" : "please update",
+    "description" : "grtdr"
 }
 ```
-
-
-⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃ ⁃
-_________________________________________________
-Powered By: [postman-to-markdown](https://github.com/bautistaj/postman-to-markdown/)
