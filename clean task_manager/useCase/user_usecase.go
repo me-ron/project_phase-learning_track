@@ -53,17 +53,17 @@ func (UUC *UserUC)Signup(user domain.UserInput) (domain.DBUser, error){
 
 }
 func (UUC *UserUC)GetUsers() ([]domain.DBUser, error){
-
+	return UUC.repo.FindAllUsers()
 }
 func (UUC *UserUC)GetUser(id string) (domain.DBUser, error){
-
+	return UUC.repo.FindById(id)
 }
-func (UUC *UserUC)MakeAdmin(id string) (domain.DBUser, error){
-
+func (UUC *UserUC)MakeAdmin(id string, user domain.UserInput) (domain.DBUser, error){
+	return UUC.repo.UpdateUserById(id, user, true)
 }
 func (UUC *UserUC)UpdateUser(id string, user domain.UserInput) (domain.DBUser, error){
-
+	return UUC.repo.UpdateUserById(id, user, false)
 }
 func (UUC *UserUC)DeleteUser(id string) error{
-
+	return UUC.repo.DeleteUserByID(id)
 }

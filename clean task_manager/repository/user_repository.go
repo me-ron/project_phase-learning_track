@@ -51,15 +51,66 @@ func (UR *UserRepo)FindByEmail(email string) (domain.UserInput, error){
 	return userDB, nil
 }
 
-func (UR *UserRepo)FindById(id string) (domain.UserInput, error){
+func (UR *UserRepo)FindById(id string) (domain.DBUser, error){
+	obId, _ := primitive.ObjectIDFromHex(id)
+	query := bson.M{"_id": obId}
+	var user domain.UserInput
+	err := UR.coll.FindOne(context.TODO(), query).Decode(&user)
+	if err != nil{
+		return domain.DBUser{}, err
+	}
 
+	return domain.ChangeToOutput(user), nil
 }
+
 func (UR *UserRepo)FindAllUsers() ([]domain.DBUser, error){
+	cursor, err := UR.coll.Find(context.TODO(), bson.M{})
 
+	if err != nil{
+		return nil, err
+	}
+
+	var users []domain.DBUser
+
+	for cursor.Next(context.TODO()){
+		user := domain.UserInput{}
+		err := cursor.Decode(&user)
+
+		if err != nil{
+			return nil, err
+		}
+
+		users = append(users, domain.ChangeToOutput(user))
+	}
+
+	return users, nil
 }
+
 func (UR *UserRepo)UpdateUserById(id string, user domain.UserInput, is_admin bool) (domain.DBUser, error){
+	obId, _ := primitive.ObjectIDFromHex(id)
+	user.ID = obId
+	user.IsAdmin = is_admin
+	bsonModel, err := bson.Marshal(user)
+	if err != nil {
+		return domain.DBUser{}, err
+	}
 
+	var doc bson.M
+	err = bson.Unmarshal(bsonModel, &doc)
+	if err != nil {
+		return domain.DBUser{}, err
+	}
+	filter := bson.D{{Key: "_id", Value: obId}, {Key: "_id", Value: user.ID}}
+	update := bson.D{{Key: "$set", Value: doc}}
+
+	_, err = UR.coll.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return domain.DBUser{}, err
+	}
+
+	return domain.ChangeToOutput(user), nil
 }
+
 func (UR *UserRepo)CreateUser(user domain.UserInput) (domain.DBUser, error){
 	// Set other user properties
 	user.ID = primitive.NewObjectID()
@@ -78,6 +129,20 @@ func (UR *UserRepo)CreateUser(user domain.UserInput) (domain.DBUser, error){
 	return domain.ChangeToOutput(user), nil
 
 }
-func (UR *UserRepo)DeleteUserByID(id string) error{
 
+func (UR *UserRepo)DeleteUserByID(id string) error{
+	obId, _ := primitive.ObjectIDFromHex(id)
+	query := bson.M{"_id": obId}
+
+	res, err := UR.coll.DeleteOne(context.TODO(), query)
+
+	if err != nil{
+		return err
+	}
+
+	if res.DeletedCount == 0{
+		return errors.New("no document with this id exists")
+	}
+
+	return nil
 }
