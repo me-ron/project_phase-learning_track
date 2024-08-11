@@ -8,34 +8,16 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type TaskRepo struct {
 	coll *mongo.Collection
 }
 
-func (TR *TaskRepo) EnsureIndexes() error {
-	indexModel := mongo.IndexModel{
-		Keys:    bson.M{"email": 1}, 
-		Options: options.Index().SetUnique(true),
+func NewTaskRepo(db mongo.Database, name string) *TaskRepo{
+	return &TaskRepo{
+		coll: db.Collection(name),
 	}
-	
-	_, err := TR.coll.Indexes().CreateOne(context.TODO(), indexModel)
-	return err
-}
-
-func NewTaskRepo(collection *mongo.Collection) (*TaskRepo, error) {
-	TR := &TaskRepo{
-		coll : collection,
-	}
-
-	// Ensure indexes are created
-	if err := TR.EnsureIndexes(); err != nil {
-		return nil, err
-	}
-
-	return TR, nil
 }
 
 func (TR *TaskRepo) CreateTask(task domain.Task) (domain.Task, error){
