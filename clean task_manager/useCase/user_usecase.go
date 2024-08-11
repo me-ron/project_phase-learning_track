@@ -4,18 +4,66 @@ import "task_manager/domain"
 
 type UserUC struct {
 	repo domain.UserRepository
+	PasswordS domain.PasswordService
+	TokenS domain.TokenService
 }
 
-func NewUserUC(repository domain.UserRepository) *UserUC{
+func NewUserUC(repository domain.UserRepository, PS domain.PasswordService, TS domain.TokenService) *UserUC{
 	return &UserUC{
 		repo: repository,
+		PasswordS: PS,
+		TokenS: TS,
 	}
 }
 
-func (UUC *UserUC)Login(domain.UserInput) (domain.DBUser, string, error)
-func (UUC *UserUC)Signup(domain.UserInput) (domain.DBUser, error)
-func (UUC *UserUC)GetUsers() ([]domain.DBUser, error)
-func (UUC *UserUC)GetUser(string) (domain.DBUser, error)
-func (UUC *UserUC)MakeAdmin(string) (domain.DBUser, error)
-func (UUC *UserUC)UpdateUser(string, domain.UserInput) (domain.DBUser, error)
-func (UUC *UserUC)DeleteUser(string) error
+func (UUC *UserUC)Login(user domain.UserInput) (domain.DBUser, string, error){
+	usr, err := UUC.repo.FindByEmail(user.Email)
+	if err != nil {
+		return domain.DBUser{}, "", err
+	}
+
+	_, er := UUC.PasswordS.ComparePassword(usr.Password, user.Password)
+	if er != nil{
+		return domain.DBUser{}, "", er
+	}
+
+	token, terr := UUC.TokenS.CreateToken(usr)
+	if terr != nil{
+		return domain.DBUser{}, "", terr
+	}
+
+	return domain.ChangeToOutput(usr), token, nil
+
+
+}
+func (UUC *UserUC)Signup(user domain.UserInput) (domain.DBUser, error){
+	hashed_password, err := UUC.PasswordS.HashPasword(user.Password)
+	if err != nil{
+		return domain.DBUser{}, err
+	}
+
+	user.Password = hashed_password
+	usr, er := UUC.repo.CreateUser(user)
+
+	if er != nil{
+		return domain.DBUser{}, er
+	}
+
+	return usr, nil
+
+}
+func (UUC *UserUC)GetUsers() ([]domain.DBUser, error){
+
+}
+func (UUC *UserUC)GetUser(id string) (domain.DBUser, error){
+
+}
+func (UUC *UserUC)MakeAdmin(id string) (domain.DBUser, error){
+
+}
+func (UUC *UserUC)UpdateUser(id string, user domain.UserInput) (domain.DBUser, error){
+
+}
+func (UUC *UserUC)DeleteUser(id string) error{
+
+}
