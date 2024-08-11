@@ -24,14 +24,14 @@ type UserUsecase interface {
 	Signup(UserInput) (DBUser, error)
 	GetUsers() ([]DBUser, error)
 	GetUser(string) (DBUser, error)
-	MakeAdmin(string, UserInput) (DBUser, error)
+	MakeAdmin(string) (DBUser, error)
 	UpdateUser(string, UserInput) (DBUser, error)
 	DeleteUser(string) error
 }
 
 type UserRepository interface {
 	FindByEmail(string) (UserInput, error)
-	FindById(string) (DBUser, error)
+	FindById(string) (UserInput, error)
 	FindAllUsers() ([]DBUser, error)
 	UpdateUserById(string, UserInput, bool) (DBUser, error)
 	CreateUser(UserInput) (DBUser, error)
