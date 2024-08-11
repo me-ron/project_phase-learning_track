@@ -14,7 +14,7 @@ type TaskRepo struct {
 	coll *mongo.Collection
 }
 
-func NewTaskRepo(db mongo.Database, name string) *TaskRepo{
+func NewTaskRepo(db *mongo.Database, name string) *TaskRepo{
 	return &TaskRepo{
 		coll: db.Collection(name),
 	}

@@ -25,7 +25,7 @@ func (UR *UserRepo) EnsureIndexes() error {
 	return err
 }
 
-func NewUserRepo(db mongo.Database, name string) (*UserRepo, error) {
+func NewUserRepo(db *mongo.Database, name string) (*UserRepo, error) {
 	UR := &UserRepo{
 		coll : db.Collection(name),
 	}
@@ -51,16 +51,16 @@ func (UR *UserRepo)FindByEmail(email string) (domain.UserInput, error){
 	return userDB, nil
 }
 
-func (UR *UserRepo)FindById(id string) (domain.DBUser, error){
+func (UR *UserRepo)FindById(id string) (domain.UserInput, error){
 	obId, _ := primitive.ObjectIDFromHex(id)
 	query := bson.M{"_id": obId}
 	var user domain.UserInput
 	err := UR.coll.FindOne(context.TODO(), query).Decode(&user)
 	if err != nil{
-		return domain.DBUser{}, err
+		return domain.UserInput{}, err
 	}
 
-	return domain.ChangeToOutput(user), nil
+	return user, nil
 }
 
 func (UR *UserRepo)FindAllUsers() ([]domain.DBUser, error){
