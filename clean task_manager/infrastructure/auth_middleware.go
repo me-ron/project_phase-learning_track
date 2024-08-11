@@ -20,7 +20,8 @@ func AuthMiddleware(c *gin.Context) {
 		return
 	}
 
-	err := TokenValidate(auth)
+	JW := JwtService{}
+	err := JW.TokenValidate(auth)
 
 	if err != nil {
 		c.JSON(401, gin.H{"error": err.Error()})

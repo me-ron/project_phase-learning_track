@@ -4,11 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"task_manager/domain"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
 
-func TokenValidate(auth string) error {
+type JwtService struct{}
+
+func (JwtService)TokenValidate(auth string) error {
 	authSplit := strings.Split(auth, " ")
 
 	if len(authSplit) != 2 || strings.ToLower(authSplit[0]) != "bearer" {
@@ -28,4 +32,24 @@ func TokenValidate(auth string) error {
 	}
 
 	return nil
+}
+
+func (JwtService)CreateToken(usr domain.UserInput)(string, error){
+	token := jwt.NewWithClaims(
+		jwt.SigningMethodHS256, 
+		&domain.Dclaims{
+			ID: usr.ID, 
+			Name: usr.Name, 
+			Email: usr.Email, 
+			IsAdmin: usr.IsAdmin, 
+			StandardClaims: jwt.StandardClaims{ExpiresAt: time.Now().Add(time.Hour * 24).Unix()},
+		})
+
+	jwtToken, err := token.SignedString(secretKey)
+
+	if err != nil {
+		return "", err
+	}
+
+	return jwtToken, nil
 }
