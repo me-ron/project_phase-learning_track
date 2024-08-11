@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"github.com/dgrijalva/jwt-go"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -18,14 +17,6 @@ type DBUser struct {
 	Name    string             `json:"name,omitempty" bson:"name,omitempty"`
 	Email   string             `json:"email,omitempty" bson:"email,omitempty"`
 	IsAdmin bool               `json:"isadmin" bson:"isadmin"`
-}
-
-type Dclaims struct {
-	jwt.StandardClaims
-	ID      primitive.ObjectID
-	Name    string
-	Email   string
-	IsAdmin bool
 }
 
 type UserUsecase interface {
