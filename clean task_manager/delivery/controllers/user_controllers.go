@@ -111,7 +111,6 @@ func UpdateUser(UUC domain.UserUsecase) gin.HandlerFunc{
 			c.IndentedJSON(http.StatusBadRequest, gin.H{"error" : err.Error()})
 			return
 		}
-
 		usr, er := UUC.UpdateUser(id, user)
 		if er != nil{
 			c.IndentedJSON(http.StatusBadGateway, gin.H{"error" : er.Error()})

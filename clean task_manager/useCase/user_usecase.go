@@ -67,6 +67,27 @@ func (UUC *UserUC)MakeAdmin(id string) (domain.DBUser, error){
 	return UUC.repo.UpdateUserById(id, user, true)
 }
 func (UUC *UserUC)UpdateUser(id string, user domain.UserInput) (domain.DBUser, error){
+	usr, err := UUC.repo.FindById(id)
+	if err != nil{
+		return domain.DBUser{}, err
+	}
+	if user.Password != "" {
+		hashed_password, err := UUC.PasswordS.HashPasword(user.Password)
+		if err != nil{
+			return domain.DBUser{}, err
+		}
+		user.Password = hashed_password
+	}else{
+		user.Password = usr.Password
+	}
+	
+	if user.Name == ""{
+		user.Name = usr.Name
+	}
+	if user.Email == ""{
+		user.Email = usr.Email
+	}
+
 	return UUC.repo.UpdateUserById(id, user, false)
 }
 func (UUC *UserUC)DeleteUser(id string) error{
