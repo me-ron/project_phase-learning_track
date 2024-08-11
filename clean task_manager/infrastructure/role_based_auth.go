@@ -1,6 +1,5 @@
 package infrastructure
 
-
 import (
 	"net/http"
 	"strings"
@@ -9,6 +8,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func RoleBasedAuth(protected bool) gin.HandlerFunc {
@@ -27,12 +27,26 @@ func RoleBasedAuth(protected bool) gin.HandlerFunc {
 			return
 		}
 
-		user := domain.DBUser{ID: claims.ID, Name: claims.Name, Email: claims.Email, IsAdmin: claims.IsAdmin}
+		user := domain.DBUser{
+			ID: claims.ID, 
+			Name: claims.Name, 
+			Email: claims.Email, 
+			IsAdmin: claims.IsAdmin}
+
 		if claims.IsAdmin {
 			c.Set("filter", bson.M{})
 		} else {
 			if protected {
 				c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "you need to be an admin"})
+				c.Abort()
+				return
+			}
+
+			path := c.Request.URL.Path
+			idx := c.Param("id")
+			objid, _ := primitive.ObjectIDFromHex(idx)
+        	if strings.Contains(path, "user") && idx != "" && objid != user.ID {
+				c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
 				c.Abort()
 				return
 			}
