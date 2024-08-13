@@ -12,7 +12,7 @@ import (
 )
 
 type UserRepo struct {
-	coll *mongo.Collection
+	coll domain.CollectionInterface
 }
 
 func (UR *UserRepo) EnsureIndexes() error {
@@ -25,9 +25,9 @@ func (UR *UserRepo) EnsureIndexes() error {
 	return err
 }
 
-func NewUserRepo(db *mongo.Database, name string) (*UserRepo, error) {
+func NewUserRepo(collection domain.CollectionInterface) (*UserRepo, error) {
 	UR := &UserRepo{
-		coll : db.Collection(name),
+		coll : collection,
 	}
 
 	// Ensure indexes are created
@@ -140,7 +140,7 @@ func (UR *UserRepo)DeleteUserByID(id string) error{
 		return err
 	}
 
-	if res.DeletedCount == 0{
+	if res.DeletedCount() == 0{
 		return errors.New("no document with this id exists")
 	}
 

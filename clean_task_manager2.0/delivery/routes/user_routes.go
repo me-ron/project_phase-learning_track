@@ -2,6 +2,7 @@ package routes
 
 import (
 	"log"
+	"task_manager/database"
 	"task_manager/delivery/controllers"
 	"task_manager/infrastructure"
 	"task_manager/repository"
@@ -12,7 +13,8 @@ import (
 )
 
 func StartUserRoutes(db *mongo.Database, router *gin.Engine){
-	user_repo, err := repository.NewUserRepo(db, "users")
+	collection := &database.MongoCollection{Collection: db.Collection("users")}
+	user_repo, err := repository.NewUserRepo(collection)
 	if err != nil{
 		log.Panic(err.Error())
 	}
