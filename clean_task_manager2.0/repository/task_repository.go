@@ -7,16 +7,15 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type TaskRepo struct {
-	coll *mongo.Collection
+	coll domain.CollectionInterface
 }
 
-func NewTaskRepo(db *mongo.Database, name string) *TaskRepo{
+func NewTaskRepo(collection domain.CollectionInterface) *TaskRepo{
 	return &TaskRepo{
-		coll: db.Collection(name),
+		coll: collection,
 	}
 }
 
@@ -52,7 +51,7 @@ func (TR *TaskRepo) DeleteTaskById(id string, userId primitive.ObjectID) error{
 		return err
 	}
 
-	if res.DeletedCount == 0{
+	if res.DeletedCount() == 0{
 		return errors.New("no document with this id exists")
 	}
 

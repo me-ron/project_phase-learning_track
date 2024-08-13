@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"task_manager/database"
 	"task_manager/delivery/controllers"
 	"task_manager/infrastructure"
 	"task_manager/repository"
@@ -11,7 +12,8 @@ import (
 )
 
 func StartTaskRoutes(db *mongo.Database, router *gin.Engine){
-	task_repo := repository.NewTaskRepo(db, "tasks")
+	collection := &database.MongoCollection{Collection: db.Collection("tasks")}
+	task_repo := repository.NewTaskRepo(collection)
 	task_usecase := useCase.NewTaskUC(task_repo)
 	loggedIn := router.Group("")
 	loggedIn.Use(infrastructure.AuthMiddleware)
