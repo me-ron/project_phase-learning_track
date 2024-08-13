@@ -13,7 +13,7 @@ type CollectionInterface interface {
 	Find(context.Context, interface{}, ...*options.FindOptions) (CursorInterface, error)
 	InsertOne(context.Context, interface{}, ...*options.InsertOneOptions) (*mongo.InsertOneResult, error)
 	UpdateOne(context.Context, interface{}, interface{}, ...*options.UpdateOptions) (*mongo.UpdateResult, error)
-	DeleteOne(context.Context, interface{}, ...*options.DeleteOptions) (*mongo.DeleteResult, error)
+	DeleteOne(context.Context, interface{}, ...*options.DeleteOptions) (DeleteResultInterface, error)
 	Indexes() mongo.IndexView
 }
 
