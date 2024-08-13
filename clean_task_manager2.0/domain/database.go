@@ -7,36 +7,42 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// CollectionInterface defines the methods used in UserRepo
 type CollectionInterface interface {
 	FindOne(context.Context, interface{}, ...*options.FindOneOptions) SingleResultInterface
 	Find(context.Context, interface{}, ...*options.FindOptions) (CursorInterface, error)
 	InsertOne(context.Context, interface{}, ...*options.InsertOneOptions) (*mongo.InsertOneResult, error)
 	UpdateOne(context.Context, interface{}, interface{}, ...*options.UpdateOptions) (*mongo.UpdateResult, error)
 	DeleteOne(context.Context, interface{}, ...*options.DeleteOptions) (DeleteResultInterface, error)
-	Indexes() mongo.IndexView
+	Indexes() IndexView
 }
 
-// CursorInterface defines the methods used on the cursor
+type IndexView interface{
+	CreateOne(ctx context.Context, model mongo.IndexModel, opts ...*options.CreateIndexesOptions) (string, error)
+}
+
 type CursorInterface interface {
 	Next(context.Context) bool
 	Decode(interface{}) error
 	Close(context.Context) error
 }
 
-// SingleResultInterface defines the methods used on a single result
 type SingleResultInterface interface {
 	Decode(v interface{}) error
 }
 
-// DeleteResultInterface defines the methods used on a delete result (optional, mostly for testing purposes)
 type DeleteResultInterface interface {
 	DeletedCount() int64
 }
-
-// MongoCursor is a wrapper for mongo.Cursor
 type MongoCursor struct {
 	*mongo.Cursor
+}
+
+type MongoIndexView struct{
+	mongo.IndexView
+}
+
+func (MI *MongoIndexView) CreateOne(ctx context.Context, model mongo.IndexModel, opts ...*options.CreateIndexesOptions) (string, error){
+	return MI.IndexView.CreateOne(ctx, model , opts ...)
 }
 
 func (c *MongoCursor) Next(ctx context.Context) bool {
@@ -51,7 +57,6 @@ func (c *MongoCursor) Close(ctx context.Context) error {
 	return c.Cursor.Close(ctx)
 }
 
-// MongoSingleResult is a wrapper for mongo.SingleResult
 type MongoSingleResult struct {
 	*mongo.SingleResult
 }
@@ -60,7 +65,6 @@ func (r *MongoSingleResult) Decode(v interface{}) error {
 	return r.SingleResult.Decode(v)
 }
 
-// MongoDeleteResult is a wrapper for mongo.DeleteResult
 type MongoDeleteResult struct {
 	*mongo.DeleteResult
 }

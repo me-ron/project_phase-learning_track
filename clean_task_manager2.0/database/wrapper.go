@@ -33,6 +33,6 @@ func (c *MongoCollection) DeleteOne(ctx context.Context, filter interface{}, opt
 	return &domain.MongoDeleteResult{DeleteResult: result}, err
 }
 
-func (c *MongoCollection) Indexes() mongo.IndexView {
-	return c.Collection.Indexes()
+func (c *MongoCollection) Indexes() domain.IndexView {
+	return &domain.MongoIndexView{IndexView: c.Collection.Indexes()}
 }

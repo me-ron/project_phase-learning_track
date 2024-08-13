@@ -120,18 +120,20 @@ func (_m *CollectionInterface) FindOne(_a0 context.Context, _a1 interface{}, _a2
 }
 
 // Indexes provides a mock function with given fields:
-func (_m *CollectionInterface) Indexes() mongo.IndexView {
+func (_m *CollectionInterface) Indexes() domain.IndexView {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for Indexes")
 	}
 
-	var r0 mongo.IndexView
-	if rf, ok := ret.Get(0).(func() mongo.IndexView); ok {
+	var r0 domain.IndexView
+	if rf, ok := ret.Get(0).(func() domain.IndexView); ok {
 		r0 = rf()
 	} else {
-		r0 = ret.Get(0).(mongo.IndexView)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(domain.IndexView)
+		}
 	}
 
 	return r0
