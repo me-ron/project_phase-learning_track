@@ -21,20 +21,20 @@ func NewTaskRepo(db *mongo.Database, name string) *TaskRepo{
 }
 
 func (TR *TaskRepo) CreateTask(task domain.Task) (domain.Task, error){
-	var doc bson.M
 	task.ID = primitive.NewObjectID()
-	bsonModel,err := bson.Marshal(task)
+	// var doc bson.M
+	// bsonModel,err := bson.Marshal(task)
 
-	if err != nil {
-		return domain.Task{}, err
-	}
+	// if err != nil {
+	// 	return domain.Task{}, err
+	// }
 
-	err = bson.Unmarshal(bsonModel , &doc)
-	if err != nil {
-		return domain.Task{}, err
-	}
+	// err = bson.Unmarshal(bsonModel , &doc)
+	// if err != nil {
+	// 	return domain.Task{}, err
+	// }
 
-	_ , err = TR.coll.InsertOne(context.TODO(), doc)
+	_ , err := TR.coll.InsertOne(context.TODO(), task)
 	if err != nil {
 		return domain.Task{}, err
 	}
@@ -62,20 +62,20 @@ func (TR *TaskRepo) DeleteTaskById(id string, userId primitive.ObjectID) error{
 func (TR *TaskRepo) UpdateTaskById(id string, task domain.Task) (domain.Task, error){
 	obId, _ := primitive.ObjectIDFromHex(id)
 	task.ID = obId
-	bsonModel, err := bson.Marshal(task)
-	if err != nil {
-		return domain.Task{}, err
-	}
+	// bsonModel, err := bson.Marshal(task)
+	// if err != nil {
+	// 	return domain.Task{}, err
+	// }
 
-	var doc bson.M
-	err = bson.Unmarshal(bsonModel, &doc)
-	if err != nil {
-		return domain.Task{}, err
-	}
+	// var doc bson.M
+	// err = bson.Unmarshal(bsonModel, &doc)
+	// if err != nil {
+	// 	return domain.Task{}, err
+	// }
 	filter := bson.D{{Key: "_id", Value: obId}, {Key: "user._id", Value: task.User.ID}}
-	update := bson.D{{Key: "$set", Value: doc}}
+	update := bson.D{{Key: "$set", Value: task}}
 
-	_, err = TR.coll.UpdateOne(context.TODO(), filter, update)
+	_, err := TR.coll.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		return domain.Task{}, err
 	}

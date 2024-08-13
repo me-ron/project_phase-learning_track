@@ -90,20 +90,20 @@ func (UR *UserRepo)UpdateUserById(id string, user domain.UserInput, is_admin boo
 	obId, _ := primitive.ObjectIDFromHex(id)
 	user.ID = obId
 	user.IsAdmin = is_admin
-	bsonModel, err := bson.Marshal(user)
-	if err != nil {
-		return domain.DBUser{}, err
-	}
+	// bsonModel, err := bson.Marshal(user)
+	// if err != nil {
+	// 	return domain.DBUser{}, err
+	// }
 
-	var doc bson.M
-	err = bson.Unmarshal(bsonModel, &doc)
-	if err != nil {
-		return domain.DBUser{}, err
-	}
+	// var doc bson.M
+	// err = bson.Unmarshal(bsonModel, &doc)
+	// if err != nil {
+	// 	return domain.DBUser{}, err
+	// }
 	filter := bson.D{{Key: "_id", Value: obId}, {Key: "_id", Value: user.ID}}
-	update := bson.D{{Key: "$set", Value: doc}}
+	update := bson.D{{Key: "$set", Value: user}}
 
-	_, err = UR.coll.UpdateOne(context.TODO(), filter, update)
+	_, err := UR.coll.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		return domain.DBUser{}, err
 	}
