@@ -33,3 +33,38 @@ type SingleResultInterface interface {
 type DeleteResultInterface interface {
 	DeletedCount() int64
 }
+
+// MongoCursor is a wrapper for mongo.Cursor
+type MongoCursor struct {
+	*mongo.Cursor
+}
+
+func (c *MongoCursor) Next(ctx context.Context) bool {
+	return c.Cursor.Next(ctx)
+}
+
+func (c *MongoCursor) Decode(v interface{}) error {
+	return c.Cursor.Decode(v)
+}
+
+func (c *MongoCursor) Close(ctx context.Context) error {
+	return c.Cursor.Close(ctx)
+}
+
+// MongoSingleResult is a wrapper for mongo.SingleResult
+type MongoSingleResult struct {
+	*mongo.SingleResult
+}
+
+func (r *MongoSingleResult) Decode(v interface{}) error {
+	return r.SingleResult.Decode(v)
+}
+
+// MongoDeleteResult is a wrapper for mongo.DeleteResult
+type MongoDeleteResult struct {
+	*mongo.DeleteResult
+}
+
+func (r *MongoDeleteResult) DeletedCount() int64 {
+	return r.DeleteResult.DeletedCount
+}
