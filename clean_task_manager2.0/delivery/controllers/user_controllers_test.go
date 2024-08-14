@@ -1,16 +1,18 @@
-package controllers
+package controllers_test
 
 import (
 	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"task_manager/delivery/controllers"
 	"task_manager/domain"
 	"task_manager/mocks"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/suite"
+
 	// "go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -34,7 +36,7 @@ func (suite *UserHandlerTestSuite) TestRegister(){
 
 	suite.User_UC.On("Signup", user).Return(usr, nil)
 
-	handler := Register(suite.User_UC)
+	handler := controllers.Register(suite.User_UC)
 	jsonuser, _ := json.Marshal(user)
 
 	req, _ := http.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(jsonuser))
@@ -60,7 +62,7 @@ func (suite *UserHandlerTestSuite) TestLogIn(){
 
 	suite.User_UC.On("Login", user).Return(usr,"TOKEN", nil)
 
-	handler := Login(suite.User_UC)
+	handler := controllers.Login(suite.User_UC)
 	jsonuser, _ := json.Marshal(user)
 
 	req, _ := http.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(jsonuser))
@@ -88,7 +90,7 @@ func (suite *UserHandlerTestSuite) TestGetAllTasks() {
 
 	suite.User_UC.On("GetUsers").Return(expectedUsers, nil)
 
-	handler := GetAllUsers(suite.User_UC)
+	handler := controllers.GetAllUsers(suite.User_UC)
 
 	req, _ := http.NewRequest(http.MethodGet, "/users", nil)
 	w := httptest.NewRecorder()
@@ -111,7 +113,7 @@ func (suite *UserHandlerTestSuite) TestGetUserById(){
 
 	suite.User_UC.On("GetUser", userId).Return(expectedUser, nil)
 
-	handler := GetUserById(suite.User_UC)
+	handler := controllers.GetUserById(suite.User_UC)
 
 	req, _ := http.NewRequest(http.MethodGet, "/users"+userId, nil)
 	w := httptest.NewRecorder()
@@ -137,7 +139,7 @@ func (suite *UserHandlerTestSuite) TestMakeAdmin(){
 
 	suite.User_UC.On("MakeAdmin", userId).Return(expectedUser, nil)
 
-	handler := MakeAdmin(suite.User_UC)
+	handler := controllers.MakeAdmin(suite.User_UC)
 
 	req, _ := http.NewRequest(http.MethodPut, "/users"+userId, nil)
 	w := httptest.NewRecorder()
@@ -162,7 +164,7 @@ func (suite *UserHandlerTestSuite) TestDeleteUser(){
 
 	suite.User_UC.On("DeleteUser", userID).Return(nil)
 
-	handler := DeleteUser(suite.User_UC)
+	handler := controllers.DeleteUser(suite.User_UC)
 
 	req, _ := http.NewRequest(http.MethodDelete, "/users"+userID, nil)
 	w := httptest.NewRecorder()
@@ -189,7 +191,7 @@ func (suite *UserHandlerTestSuite) TestUpdateUser(){
 
 	suite.User_UC.On("UpdateUser",userId, user).Return(usr, nil)
 
-	handler := UpdateUser(suite.User_UC)
+	handler := controllers.UpdateUser(suite.User_UC)
 
 	req, _ := http.NewRequest(http.MethodPut, "/users"+userId, bytes.NewBuffer(jsonUser))
 	req.Header.Set("Content-Type", "application/json")

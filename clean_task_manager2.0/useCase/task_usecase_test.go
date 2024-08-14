@@ -1,8 +1,9 @@
-package useCase
+package useCase_test
 
 import (
 	"task_manager/domain"
 	"task_manager/mocks"
+	"task_manager/useCase"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -13,13 +14,13 @@ import (
 type TaskUsecaseSuite struct {
 	suite.Suite
 	mockRepo *mocks.TaskRepository
-	Task_UC *TaskUC
+	Task_UC *useCase.TaskUC
 }
 
 func (suite *TaskUsecaseSuite) SetupTest(){
 	suite.mockRepo = mocks.NewTaskRepository(suite.T())
 
-	suite.Task_UC = NewTaskUC(suite.mockRepo)
+	suite.Task_UC = useCase.NewTaskUC(suite.mockRepo)
 }
 
 func (suite *TaskUsecaseSuite) TestPostTask(){

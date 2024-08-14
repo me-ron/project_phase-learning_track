@@ -1,9 +1,10 @@
-package repository
+package repository_test
 
 import (
 	"context"
 	"task_manager/domain"
 	"task_manager/mocks"
+	"task_manager/repository"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
@@ -19,7 +20,7 @@ type TaskRepoTestSuite struct {
 	mockCursor       *mocks.CursorInterface
 	mockSingleResult *mocks.SingleResultInterface
 	mockDeleteResult *mocks.DeleteResultInterface
-	repo             *TaskRepo
+	repo             *repository.TaskRepo
 }
 
 func (suite *TaskRepoTestSuite) SetupTest() {
@@ -28,7 +29,7 @@ func (suite *TaskRepoTestSuite) SetupTest() {
 	suite.mockSingleResult = mocks.NewSingleResultInterface(suite.T())
 	suite.mockDeleteResult = mocks.NewDeleteResultInterface(suite.T())
 
-	suite.repo = NewTaskRepo(suite.mockColl)
+	suite.repo = repository.NewTaskRepo(suite.mockColl)
 }
 
 func (suite *TaskRepoTestSuite) TestFindById() {

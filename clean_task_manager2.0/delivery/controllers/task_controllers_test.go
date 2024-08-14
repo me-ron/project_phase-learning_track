@@ -1,10 +1,11 @@
-package controllers
+package controllers_test
 
 import (
 	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"task_manager/delivery/controllers"
 	"task_manager/domain"
 	"task_manager/mocks"
 	"testing"
@@ -37,7 +38,7 @@ func (suite *TaskHandlerTestSuite) TestGetAllTasks() {
 
 	suite.Task_UC.On("GetTasks", filter).Return(expectedTasks, nil)
 
-	handler := GetAllTasks(suite.Task_UC)
+	handler := controllers.GetAllTasks(suite.Task_UC)
 
 	req, _ := http.NewRequest(http.MethodGet, "/tasks", nil)
 	w := httptest.NewRecorder()
@@ -62,7 +63,7 @@ func (suite *TaskHandlerTestSuite) TestGetTaskById(){
 
 	suite.Task_UC.On("GetTask", taskId, userId).Return(expectedTask, nil)
 
-	handler := GetTaskById(suite.Task_UC)
+	handler := controllers.GetTaskById(suite.Task_UC)
 
 	req, _ := http.NewRequest(http.MethodGet, "/tasks"+taskId, nil)
 	w := httptest.NewRecorder()
@@ -91,7 +92,7 @@ func (suite *TaskHandlerTestSuite) TestPostTask(){
 
 	suite.Task_UC.On("PostTask", task, user).Return(task, nil)
 
-	handler := PostTask(suite.Task_UC)
+	handler := controllers.PostTask(suite.Task_UC)
 
 	req, _ := http.NewRequest(http.MethodPost, "/tasks", bytes.NewBuffer(jsonTask))
 	req.Header.Set("Content-Type", "application/json")
@@ -115,7 +116,7 @@ func (suite *TaskHandlerTestSuite) TestDeleteTask(){
 
 	suite.Task_UC.On("DeleteTask", taskId, user.ID).Return(nil)
 
-	handler := DeleteTask(suite.Task_UC)
+	handler := controllers.DeleteTask(suite.Task_UC)
 
 	req, _ := http.NewRequest(http.MethodDelete, "/tasks"+taskId, nil)
 	w := httptest.NewRecorder()
@@ -144,7 +145,7 @@ func (suite *TaskHandlerTestSuite) TestUpdateTask(){
 
 	suite.Task_UC.On("UpdateTask", taskID, task, user).Return(expectedTask, nil)
 
-	handler := UpdateTask(suite.Task_UC)
+	handler := controllers.UpdateTask(suite.Task_UC)
 
 	req, _ := http.NewRequest(http.MethodPut, "/tasks"+taskID, bytes.NewBuffer(jsonTask))
 	req.Header.Set("Content-Type", "application/json")

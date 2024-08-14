@@ -1,8 +1,9 @@
-package useCase
+package useCase_test
 
 import (
 	"task_manager/domain"
 	"task_manager/mocks"
+	"task_manager/useCase"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
@@ -14,7 +15,7 @@ type UserUsecaseSuite struct {
 	mockRepo *mocks.UserRepository
 	mockPass_s *mocks.PasswordService
 	mockToken_s *mocks.TokenService
-	User_UC *UserUC
+	User_UC *useCase.UserUC
 }
 
 func (suite *UserUsecaseSuite) SetupTest(){
@@ -22,7 +23,7 @@ func (suite *UserUsecaseSuite) SetupTest(){
 	suite.mockPass_s = mocks.NewPasswordService(suite.T())
 	suite.mockToken_s = mocks.NewTokenService(suite.T())
 
-	suite.User_UC = NewUserUC(suite.mockRepo, suite.mockPass_s, suite.mockToken_s)
+	suite.User_UC = useCase.NewUserUC(suite.mockRepo, suite.mockPass_s, suite.mockToken_s)
 }
 
 func (suite *UserUsecaseSuite) TestLogin(){

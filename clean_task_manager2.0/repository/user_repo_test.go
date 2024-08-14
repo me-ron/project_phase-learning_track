@@ -1,4 +1,4 @@
-package repository
+package repository_test
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 
 	"task_manager/domain"
 	"task_manager/mocks"
+	"task_manager/repository"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -23,7 +24,7 @@ type UserRepoTestSuite struct {
 	mockSingleResult *mocks.SingleResultInterface
 	mockDeleteResult *mocks.DeleteResultInterface
 	mockIdx 		*mocks.IndexView
-	repo           *UserRepo
+	repo           *repository.UserRepo
 }
 
 func (suite *UserRepoTestSuite) SetupTest() {
@@ -40,7 +41,7 @@ func (suite *UserRepoTestSuite) SetupTest() {
 		Options: options.Index().SetUnique(true),
 	}).Return("", nil)
 
-	suite.repo, err = NewUserRepo(suite.mockColl)
+	suite.repo, err = repository.NewUserRepo(suite.mockColl)
 	suite.Require().NoError(err)
 }
 
