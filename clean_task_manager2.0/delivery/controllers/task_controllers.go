@@ -81,7 +81,7 @@ func PostTask(TUC domain.TaskUsecase) gin.HandlerFunc{
 				c.IndentedJSON(http.StatusBadGateway, gin.H{"error" : err.Error()})
 				return
 			}
-			c.IndentedJSON(http.StatusCreated, gin.H{"message" : "created sucessfully", "task": task})
+			c.IndentedJSON(http.StatusCreated, gin.H{"message" : "created successfully", "task": task})
 		}
 
 }
